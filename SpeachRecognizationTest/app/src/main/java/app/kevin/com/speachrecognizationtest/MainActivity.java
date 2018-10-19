@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     static String TAG = "main";
     private SpeechRecognizer recognizer;
-
+    List<ResolveInfo> activities;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,14 +30,20 @@ public class MainActivity extends Activity {
         // 判斷裝置是否有支援語音辨識功能的 App, 若沒有則失效之
         PackageManager pm = getPackageManager();
         //---------查詢有無裝Google Voice Search Engine---------
-        List<ResolveInfo> activities=pm.queryIntentActivities(
+        activities = pm.queryIntentActivities(
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),0);
-        //-------------如果有找到-------------
-        if(activities.size()!=0){
-            try{
 
-        //------------語音辨識Intent-----------
-                Intent intent =new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        button.setOnClickListener(new Button.OnClickListener(){
+
+            @Override
+
+            public void onClick(View v) {
+                //-------------如果有找到-------------
+                if(activities.size()!=0){
+                    try{
+
+                        //------------語音辨識Intent-----------
+                        Intent intent =new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
 //                intent.putExtra
 //                        (
@@ -44,29 +51,33 @@ public class MainActivity extends Activity {
 //                                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
 //                        );
 
-                intent.putExtra( RecognizerIntent.EXTRA_LANGUAGE, Locale.TRADITIONAL_CHINESE.toString() );
-                intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);//設定只出現辨識結果第一筆
+                        intent.putExtra( RecognizerIntent.EXTRA_LANGUAGE, Locale.TRADITIONAL_CHINESE.toString() );
+                        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);//設定只出現辨識結果第一筆
 
-                // ----------開啟語音辨識Intent-----------
-                startActivityForResult( intent, 0 );
+                        // ----------開啟語音辨識Intent-----------
+                        startActivityForResult( intent, 0 );
 
-            }catch(Exception e){//catch error message
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Error")
-                        .setMessage(e.getMessage()).show();;
-            }
-        }else{//----------如果找不到-------------
-            Toast.makeText(MainActivity.this
-                    , "找不到語音辨識 App !!"
-                    , Toast.LENGTH_LONG
-            ).show();
+                    }catch(Exception e){//catch error message
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("Error")
+                                .setMessage(e.getMessage()).show();;
+                    }
+                }else {//----------如果找不到-------------
+                    Toast.makeText(MainActivity.this
+                            , "找不到語音辨識 App !!"
+                            , Toast.LENGTH_LONG
+                    ).show();
 
 //且導向Market Google語音下載網頁 讓使用者下載
-            String url="https://market.android.com/details?id=com.google.android.voicesearch";
-            Intent ie = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    String url = "https://market.android.com/details?id=com.google.android.voicesearch";
+                    Intent ie = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 //啟動Intent
-            startActivity(ie);
-        }
+                    startActivity(ie);
+                }
+
+            }
+
+        });
     }
 
     @Override
