@@ -10,17 +10,28 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class MainActivity extends Activity {
     static String TAG = "main";
+    OkHttpClient _client = new OkHttpClient().newBuilder().build();
     private TextToSpeech tts;
     List<ResolveInfo> activities;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,10 +44,10 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View arg0)
             {
-                //【英文】發音
                 tts.speak( "good job", TextToSpeech.QUEUE_FLUSH, null );
             }
         });
+
 
         Button button = (Button)findViewById( R.id.button);
         PackageManager pm = getPackageManager();
@@ -95,14 +106,11 @@ public class MainActivity extends Activity {
             for( int i = 0; i < results.size(); i++ )
             {
                 // 一個段落可拆解為多個字組
-                String[] resultWords = results.get(i).toString().split(" ");
-
-                for( int j = 0; j < resultWords.length; j++ )
-                {
-                    resultsString += resultWords[j] + ":";
-                }
+                String[] resultWords = results.get(i).toString().toLowerCase().split(" ");
+                resultsString = resultWords[0];
             }
 
+            RequestApi(resultsString);
             // 顯示結果
             Toast.makeText( this, resultsString, Toast.LENGTH_LONG ).show();
         }
@@ -133,5 +141,36 @@ public class MainActivity extends Activity {
                 }}
             );
         }
+    }
+
+    private void RequestApi(String req)
+    {
+        Request request = new Request.Builder()
+                .url("http://172.20.10.2:3000/" + req)
+                .build();
+
+        Call call = _client.newCall(request);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String result = response.body().string();
+                Log.d(TAG, "onResponse: " + result);
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        // 釋放 TTS
+        if( tts != null ) tts.shutdown();
+
+        super.onDestroy();
     }
 }
