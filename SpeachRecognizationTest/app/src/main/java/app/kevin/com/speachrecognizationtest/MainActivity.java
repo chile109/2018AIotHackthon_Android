@@ -198,6 +198,7 @@ public class MainActivity extends Activity {
                 Message message = gson.fromJson(result, Message.class);
 
                 if(message.alert == 1) {
+                    mTimer.cancel();
                     Calendar calendar = Calendar.getInstance();        //每次getInstance都是返回一個新的Calendar物件
                     initAlarm(calendar, 1);
                 }
