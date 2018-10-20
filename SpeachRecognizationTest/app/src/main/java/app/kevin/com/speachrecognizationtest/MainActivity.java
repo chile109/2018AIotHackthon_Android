@@ -1,7 +1,9 @@
 package app.kevin.com.speachrecognizationtest;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -15,7 +17,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -32,6 +40,7 @@ public class MainActivity extends Activity {
     static String TAG = "main";
     OkHttpClient _client = new OkHttpClient().newBuilder().build();
     private Timer mTimer;
+    private AlarmManager alarmManager;
     private TextToSpeech tts;
     List<ResolveInfo> activities;
 
@@ -177,8 +186,40 @@ public class MainActivity extends Activity {
             public void onResponse(Call call, Response response) throws IOException {
                 String result = response.body().string();
                 Log.d(TAG, "onResponse: " + result);
+
+                Gson gson = new GsonBuilder()
+                        .setPrettyPrinting()//格式化输出
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss")//格式化时间
+                        .create();
+
+                Message message = gson.fromJson(result, Message.class);
+
+                if(message.alert == 1) {
+                    Calendar calendar = Calendar.getInstance();        //每次getInstance都是返回一個新的Calendar物件
+                    initAlarm(calendar, 1);
+                }
             }
         });
+    }
+
+    // 初始化闹钟
+    private void initAlarm(Calendar calendar, int i) {
+
+        Log.d(TAG, "initAlarm: ");
+        // 设置闹钟触发动作
+        Intent intent = new Intent(this, AlarmBroadcast.class);
+        intent.setAction("startAlarm");
+
+        //ID需不同才會被當作獨立的pendingintent, Flags宣告為0表示不對其做覆蓋或保留處理
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, i, intent, 0);
+        setAlarm(calendar, pendingIntent);
+    }
+
+    // 设置闹钟
+    private void setAlarm(Calendar calendar, PendingIntent pendingIntent) {
+        // 实例化AlarmManager
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 
     @Override
