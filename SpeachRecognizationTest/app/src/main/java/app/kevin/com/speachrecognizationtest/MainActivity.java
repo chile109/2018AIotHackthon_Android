@@ -14,6 +14,7 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -47,6 +48,11 @@ public class MainActivity extends Activity {
     private TextToSpeech tts;
     List<ResolveInfo> activities;
 
+    ImageView img1 = (ImageView)findViewById(R.id.imageView);
+    ImageView img2 = (ImageView)findViewById(R.id.imageView2);
+    ImageView img3 = (ImageView)findViewById(R.id.imageView3);
+    ImageView button = (ImageView)findViewById(R.id.imageView4);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +73,6 @@ public class MainActivity extends Activity {
 
     protected void SetSpeech()
     {
-        ImageView button = (ImageView)findViewById(R.id.imageView4);
         PackageManager pm = getPackageManager();
 
         activities = pm.queryIntentActivities(
@@ -198,6 +203,11 @@ public class MainActivity extends Activity {
                 Message message = gson.fromJson(result, Message.class);
 
                 if(message.alert == 1) {
+                    img1.setVisibility(View.GONE);
+                    ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) img2.getLayoutParams();
+                    marginParams.setMargins(0, 0, 0, 0);
+                    img3.setVisibility(View.VISIBLE);
+                    button.setVisibility(View.VISIBLE);
                     mTimer.cancel();
                     Calendar calendar = Calendar.getInstance();        //每次getInstance都是返回一個新的Calendar物件
                     initAlarm(calendar, 1);
