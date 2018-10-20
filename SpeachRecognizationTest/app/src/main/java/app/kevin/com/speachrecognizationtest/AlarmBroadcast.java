@@ -34,8 +34,8 @@ public class AlarmBroadcast extends BroadcastReceiver{
             Notification.Builder builder =
                     new Notification.Builder(context)
                             .setSmallIcon(R.drawable.ic_launcher_background)
-                            .setContentTitle("qwe")
-                            .setContentText("123")
+                            .setContentTitle("Death Warnning")
+                            .setContentText("Quant Score : 10")
                             .setChannelId(MedicineChanel);
 
             Random r = new Random();
