@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
@@ -19,6 +21,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -53,6 +56,12 @@ public class MainActivity extends Activity {
     ImageView img3 ;
     ImageView button ;
 
+
+    private SpeechRecognizer recognizer;
+    private Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+    final Handler handler = new Handler();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +83,11 @@ public class MainActivity extends Activity {
         }, 1000, 3000/* 表示1000毫秒之後，每隔1000毫秒執行一次 */);
 
         SetSpeech();
+
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        recognizer.setRecognitionListener(new MyRecognizerListener());
+        recognizer.startListening(intent);
     }
 
     protected void SetSpeech()
@@ -86,32 +100,7 @@ public class MainActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(activities.size()!=0){
-                    try{
-
-                        //------------語音辨識Intent-----------
-                        Intent intent =new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                        intent.putExtra( RecognizerIntent.EXTRA_LANGUAGE, Locale.US.toString() );
-                        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,3);//設定只出現辨識結果第一筆
-
-                        // ----------開啟語音辨識Intent-----------
-                        startActivityForResult( intent, 0 );
-
-                    }catch(Exception e){//catch error message
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("Error")
-                                .setMessage(e.getMessage()).show();;
-                    }
-                }else {
-                    Toast.makeText(MainActivity.this
-                            , "找不到語音辨識 App !!"
-                            , Toast.LENGTH_LONG
-                    ).show();
-
-                    String url = "https://market.android.com/details?id=com.google.android.voicesearch";
-                    Intent ie = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(ie);
-                }
+                recognizer.startListening(intent);
             }
         });
     }
@@ -258,4 +247,84 @@ public class MainActivity extends Activity {
 
         super.onDestroy();
     }
+
+    private class MyRecognizerListener implements RecognitionListener {
+
+        @Override
+        public void onResults(Bundle results) {
+            List<String> resList = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            StringBuffer sb = new StringBuffer();
+            for(String res: resList) {
+                sb.append(res);
+                break;
+            }
+            Log.d("RECOGNIZER", sb.toString());
+            if(sb.equals("temperature"))
+            {
+                tts.setSpeechRate(1.5f);
+                tts.speak( "forty degrees Celsius", TextToSpeech.QUEUE_FLUSH, null );
+                return;
+            }
+
+            if(sb.equals("pressure"))
+            {
+                tts.setSpeechRate(2f);
+                tts.speak( "two hundred over one hundred fifty", TextToSpeech.QUEUE_FLUSH, null );
+                return;
+            }
+
+            Log.d("RECOGNIZER", "onResults: " + sb.toString());
+        }
+
+        @Override
+        public void onError(int error) {
+            Log.d("RECOGNIZER", "Error Code: " + error);
+        }
+
+        @Override
+        public void onReadyForSpeech(Bundle params) {
+            Log.d("RECOGNIZER", "ready");
+        }
+
+        @Override
+        public void onBeginningOfSpeech() {
+            Log.d("RECOGNIZER", "beginning");
+        }
+
+        @Override
+        public void onRmsChanged(float rmsdB) {
+        }
+
+        @Override
+        public void onBufferReceived(byte[] buffer) {
+            Log.d("RECOGNIZER", "onBufferReceived");
+        }
+
+        @Override
+        public void onEndOfSpeech() {
+
+            Log.d("RECOGNIZER", "onEndOfSpeech");
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Do something after 5s = 5000ms
+
+                    Log.d("RECOGNIZER","done");
+                    recognizer.startListening(intent);
+                }
+            }, 1000);
+        }
+
+        @Override
+        public void onPartialResults(Bundle partialResults) {
+            Log.d("RECOGNIZER", "onPartialResults" + partialResults.toString());
+        }
+
+        @Override
+        public void onEvent(int eventType, Bundle params) {
+            Log.d("RECOGNIZER", "onPartialResults" + params.toString());
+        }
+
+    }
+
 }
