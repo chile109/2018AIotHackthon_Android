@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -29,6 +31,7 @@ import okhttp3.Response;
 public class MainActivity extends Activity {
     static String TAG = "main";
     OkHttpClient _client = new OkHttpClient().newBuilder().build();
+    private Timer mTimer;
     private TextToSpeech tts;
     List<ResolveInfo> activities;
 
@@ -48,7 +51,19 @@ public class MainActivity extends Activity {
             }
         });
 
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                RequestApi();
+            }
+        }, 1000, 3000/* 表示1000毫秒之後，每隔1000毫秒執行一次 */);
 
+
+    }
+
+    protected void SetSpeech()
+    {
         Button button = (Button)findViewById( R.id.button);
         PackageManager pm = getPackageManager();
 
@@ -110,7 +125,7 @@ public class MainActivity extends Activity {
                 resultsString = resultWords[0];
             }
 
-            RequestApi(resultsString);
+            RequestApi();
             // 顯示結果
             Toast.makeText( this, resultsString, Toast.LENGTH_LONG ).show();
         }
@@ -143,10 +158,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void RequestApi(String req)
+    private void RequestApi()
     {
+        Log.d(TAG, "RequestApi: ");
         Request request = new Request.Builder()
-                .url("http://172.20.10.2:3000/" + req)
+                .url("https://chuangtc.com/tmu_hackathon2018/api/api.php")
                 .build();
 
         Call call = _client.newCall(request);
