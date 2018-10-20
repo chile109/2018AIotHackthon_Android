@@ -14,7 +14,10 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -49,17 +52,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button button2 = (Button)findViewById( R.id.button2);
         createLanguageTTS();
-
-        button2.setOnClickListener( new Button.OnClickListener(){
-            @Override
-            public void onClick(View arg0)
-            {
-                tts.setSpeechRate(5f);
-                tts.speak( "Death Warnning", TextToSpeech.QUEUE_FLUSH, null );
-            }
-        });
 
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
@@ -69,29 +62,27 @@ public class MainActivity extends Activity {
             }
         }, 1000, 3000/* 表示1000毫秒之後，每隔1000毫秒執行一次 */);
 
-
+        SetSpeech();
     }
 
     protected void SetSpeech()
     {
-        Button button = (Button)findViewById( R.id.button);
+        ImageView button = (ImageView)findViewById(R.id.imageView4);
         PackageManager pm = getPackageManager();
 
         activities = pm.queryIntentActivities(
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),0);
 
-        button.setOnClickListener(new Button.OnClickListener(){
-
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
-
             public void onClick(View v) {
                 if(activities.size()!=0){
                     try{
 
                         //------------語音辨識Intent-----------
                         Intent intent =new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                        intent.putExtra( RecognizerIntent.EXTRA_LANGUAGE, Locale.TRADITIONAL_CHINESE.toString() );
-                        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);//設定只出現辨識結果第一筆
+                        intent.putExtra( RecognizerIntent.EXTRA_LANGUAGE, Locale.US.toString() );
+                        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,3);//設定只出現辨識結果第一筆
 
                         // ----------開啟語音辨識Intent-----------
                         startActivityForResult( intent, 0 );
@@ -111,9 +102,7 @@ public class MainActivity extends Activity {
                     Intent ie = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(ie);
                 }
-
             }
-
         });
     }
 
@@ -127,15 +116,28 @@ public class MainActivity extends Activity {
             // 取得 STT 語音辨識的結果段落
             ArrayList results = data.getStringArrayListExtra( RecognizerIntent.EXTRA_RESULTS );
 
+            if(results.contains("temperature"))
+            {
+                tts.setSpeechRate(1.5f);
+                tts.speak( "forty degrees Celsius", TextToSpeech.QUEUE_FLUSH, null );
+                return;
+            }
+
+            if(results.contains("pressure"))
+            {
+                tts.setSpeechRate(2f);
+                tts.speak( "two hundred over one hundred fifty", TextToSpeech.QUEUE_FLUSH, null );
+                return;
+            }
+
             // 語音辨識的每個段落
             for( int i = 0; i < results.size(); i++ )
             {
                 // 一個段落可拆解為多個字組
                 String[] resultWords = results.get(i).toString().toLowerCase().split(" ");
-                resultsString = resultWords[0];
+                resultsString += resultWords[i];
             }
 
-            RequestApi();
             // 顯示結果
             Toast.makeText( this, resultsString, Toast.LENGTH_LONG ).show();
         }
@@ -221,6 +223,8 @@ public class MainActivity extends Activity {
         // 实例化AlarmManager
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        tts.setSpeechRate(5f);
+        tts.speak( "Death Warnning", TextToSpeech.QUEUE_FLUSH, null );
     }
 
     @Override
