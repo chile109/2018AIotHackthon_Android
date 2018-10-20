@@ -56,7 +56,8 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View arg0)
             {
-                tts.speak( "good job", TextToSpeech.QUEUE_FLUSH, null );
+                tts.setSpeechRate(5f);
+                tts.speak( "Death Warnning", TextToSpeech.QUEUE_FLUSH, null );
             }
         });
 
@@ -154,7 +155,7 @@ public class MainActivity extends Activity {
                     if( arg0 == TextToSpeech.SUCCESS )
                     {
                         // 指定的語系: 英文(美國)
-                        Locale l = Locale.US;  // 不要用 Locale.ENGLISH, 會預設用英文(印度)
+                        Locale l = Locale.UK;  // 不要用 Locale.ENGLISH, 會預設用英文(印度)
 
                         // 目前指定的【語系+國家】TTS, 已下載離線語音檔, 可以離線發音
                         if( tts.isLanguageAvailable( l ) == TextToSpeech.LANG_COUNTRY_AVAILABLE )
