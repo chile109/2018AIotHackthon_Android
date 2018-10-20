@@ -48,15 +48,20 @@ public class MainActivity extends Activity {
     private TextToSpeech tts;
     List<ResolveInfo> activities;
 
-    ImageView img1 = (ImageView)findViewById(R.id.imageView);
-    ImageView img2 = (ImageView)findViewById(R.id.imageView2);
-    ImageView img3 = (ImageView)findViewById(R.id.imageView3);
-    ImageView button = (ImageView)findViewById(R.id.imageView4);
+    ImageView img1 ;
+    ImageView img2 ;
+    ImageView img3 ;
+    ImageView button ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        img1 = (ImageView)findViewById(R.id.imageView);
+        img2 = (ImageView)findViewById(R.id.imageView2);
+        img3 = (ImageView)findViewById(R.id.imageView3);
+        button = (ImageView)findViewById(R.id.imageView4);
 
         createLanguageTTS();
 
@@ -203,11 +208,18 @@ public class MainActivity extends Activity {
                 Message message = gson.fromJson(result, Message.class);
 
                 if(message.alert == 1) {
-                    img1.setVisibility(View.GONE);
-                    ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) img2.getLayoutParams();
-                    marginParams.setMargins(0, 0, 0, 0);
-                    img3.setVisibility(View.VISIBLE);
-                    button.setVisibility(View.VISIBLE);
+                    runOnUiThread(new Runnable(){
+
+                        @Override
+                        public void run(){
+                            img1.setVisibility(View.GONE);
+                            ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) img2.getLayoutParams();
+                            marginParams.setMargins(0, 0, 0, 0);
+                            img3.setVisibility(View.VISIBLE);
+                            button.setVisibility(View.VISIBLE);
+                        }
+                    });
+
                     mTimer.cancel();
                     Calendar calendar = Calendar.getInstance();        //每次getInstance都是返回一個新的Calendar物件
                     initAlarm(calendar, 1);
