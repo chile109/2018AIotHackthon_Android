@@ -1,18 +1,17 @@
 package app.kevin.com.speachrecognizationtest;
 
-
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.widget.Toast;
 
 import java.util.Random;
 
-public class AlarmBroadcast extends BroadcastReceiver {
+public class AlarmBroadcast extends BroadcastReceiver{
+
     public static final String MedicineChanel = "default";
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -43,6 +42,5 @@ public class AlarmBroadcast extends BroadcastReceiver {
             notificationManager.notify(r.nextInt(), builder.build());
         }
     }
-
 
 }
