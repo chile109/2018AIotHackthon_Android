@@ -1,2 +1,2 @@
-# SpeechRecogzationPractice_Android
-reference: https://chengabriel.blogspot.com/2016/04/android-dialog.html
+# ICU Alarm system & voice query service
+feature: okhttp, Gson, AlarmManager, NotificationChanel
