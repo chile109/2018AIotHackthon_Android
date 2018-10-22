@@ -88,6 +88,8 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 if(activities.size()!=0){
                     try{
+                        tts.setSpeechRate(3f);
+                        tts.speak( "Ask me", TextToSpeech.QUEUE_FLUSH, null );
 
                         //------------語音辨識Intent-----------
                         Intent intent =new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
